@@ -5,11 +5,38 @@ const mailgunConfig = require('./config')()
 const mailgun = require('mailgun-js')(mailgunConfig)
 
 const cryptoRandomString = require('crypto-random-string')
+const validator = require('validator')
 
-router.use((req, res, next) => {
+router.use('/userVerify', (req, res, next) => {
   console.log(req.body)
   //Validating the body which contains email and password before moving ahead
-  next()
+  //Basic validation
+  if( !validator.isEmpty(req.body.email) && validator.isEmail(req.body.email)) {
+    if( !validator.isEmpty(req.body.password) && !validator.isEmpty(req.body.confirmedPassword) ) {
+      if(validator.isLength(req.body.password, {min : 8, max : 25})
+         && validator.isLength(req.body.confirmedPassword, {min : 8, max : 25})) {
+           if(validator.equals(req.body.password, req.body.confirmedPassword)) {
+             next() //Move on to handling the respecive route
+           } else {
+             res.status(400).json({
+               msg : 'The passwords do not match'
+             })
+           }
+         } else {
+           res.status(400).json({
+             msg : 'The length of password should be in the range of 8 - 25'
+           })
+         }
+    } else {
+      res.status(400).json({
+        msg : 'Either of the password field is empty!'
+      })
+    }
+  } else {
+    res.status(400).json({
+      msg : 'The email is either empty or not in the right format!'
+    })
+  }
 })
 
 router.post('/userVerify', (req, res) => {
@@ -37,10 +64,14 @@ router.post('/userVerify', (req, res) => {
   mailgun.messages().send(data, (err, body) => {
     if(err) {
       console.log(err)
-      res.status(err.statusCode).end()
+      res.status(err.statusCode).json({
+        status : "Coudn't send the mail!; Retry again..."
+      })
     } else {
       console.log(body)
-      res.status(201).end()
+      res.status(201).json({
+        status : "The mail has been successfully sent; Check your inbox/spam"
+      })
     }
   })
 })
