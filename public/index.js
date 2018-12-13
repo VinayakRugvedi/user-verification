@@ -2,11 +2,13 @@ var submitButton = document.querySelector('.submitButton')
 submitButton.addEventListener('click', () => {
   var emailEntered = document.getElementById('email')
   var passwordEntered = document.getElementById('password')
+  var confirmedPassword = document.getElementById('confirmedPassword')
   fetch('http://localhost:5000/userVerify', {
     method : "POST",
     body : JSON.stringify({
       email : emailEntered.value,
-      password : passwordEntered.value
+      password : passwordEntered.value,
+      confirmedPassword : confirmedPassword.value
     }),
     headers : {
       'Content-Type' : 'application/json'
@@ -16,5 +18,6 @@ submitButton.addEventListener('click', () => {
   .then(json => {
         console.log(json)
         emailEntered.value = ''
-        passwordEntered.value = ''})
+        passwordEntered.value = ''
+        confirmedPassword.value = ''})
 })
