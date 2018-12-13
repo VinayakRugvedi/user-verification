@@ -1,0 +1,48 @@
+html {
+  background-image: url('bg.png')
+}
+
+body {
+  width : 50vw;
+  height : 100vh;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.registerContainer {
+  width : 55%;
+  padding: 0px 0px;
+  padding-top: 5%;
+  padding-bottom: 8%;
+  /* border: 2px solid red; */
+  background-color: rgba(0,0,0,0.5);
+  color: white;
+  text-align: center;
+  font-size: 30px;
+}
+
+.registerContainer input {
+  display: block;
+  margin: 2% auto;
+  width: 85%;
+  height: 6%;
+  font-size: 22px;
+  background-color: rgba(0,0,0,0.6);
+  border: none;
+  padding: 4px;
+  color: white;
+}
+
+.registerContainer button {
+  display: block;
+  margin: 1% auto;
+  width: 25%;
+  height: 5%;
+  font-size: 20px;
+  background-color: rgba(0,0,0,0.6);
+  border: none;
+  padding: 4px;
+  color: white;
+}
