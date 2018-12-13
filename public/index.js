@@ -19,5 +19,8 @@ submitButton.addEventListener('click', () => {
         console.log(json)
         emailEntered.value = ''
         passwordEntered.value = ''
-        confirmedPassword.value = ''})
+        confirmedPassword.value = ''
+        let element = document.querySelector('.message')
+        element.textContent = json.msg
+      })
 })
