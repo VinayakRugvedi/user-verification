@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const sendVerificationLink = require('./sendVerificationLink')
+const handleDB = require('./handleDB')
 
 const cryptoRandomString = require('crypto-random-string')
 const validator = require('validator')
@@ -9,8 +9,8 @@ const bcrypt = require('bcryptjs')
 
 router.use('/userVerify', (req, res, next) => {
   console.log(req.body)
+
   //Validating the body which contains email and password before moving ahead
-  //Basic validation
   if( !validator.isEmpty(req.body.email) && validator.isEmail(req.body.email)) {
     if( !validator.isEmpty(req.body.password) && !validator.isEmpty(req.body.confirmedPassword) ) {
       if(validator.isLength(req.body.password, {min : 8, max : 25})
@@ -55,8 +55,8 @@ router.post('/userVerify', (req, res) => {
     console.log(hash) //Hashed password to be stored in db
     userData.password = hash //Store userData
 
-    //Upon successfull validation and storing, send a verification link to user
-    sendVerificationLink(req.body.email, token, res)
+    //Upon Validation and Hashing
+    handleDB.store(userData, res)
   })
   .catch( err => {
     console.log(err)
@@ -69,10 +69,7 @@ router.post('/userVerify', (req, res) => {
 router.get('/verifyMe/:token', (req, res) => {
   //When the user clicks the verification link, update his/her status in DB
   console.log(req.params.token)
-  //Using Date.now() - No of ms since Jan 1, 1970
-  res.json({
-    status : 'You are verified'
-  })
+  handleDB.fetch(req.params.token, res)
 })
 
 module.exports = router
