@@ -21,6 +21,9 @@ body {
   color: white;
   text-align: center;
   font-size: 30px;
+  font-family: 'Monoton', cursive;
+  box-shadow: 0px 0px 50px black;
+  border-radius: 10px;
 }
 
 .registerContainer input {
@@ -41,8 +44,19 @@ body {
   width: 25%;
   height: 5%;
   font-size: 20px;
+  font-family: 'Monoton', cursive;
   background-color: rgba(0,0,0,0.6);
   border: none;
   padding: 4px;
   color: white;
+}
+
+.registerContainer button:hover {
+  font-weight: bolder;
+}
+
+.message {
+  font-size: 30px;
+  font-family: 'VT323', monospace;
+  color: cyan;
 }
