@@ -2,6 +2,7 @@ const mailgunConfig = require('./config')()
 const mailgun = require('mailgun-js')(mailgunConfig)
 
 function sendVerificationLink(email, token, res) {
+
   let data = {
     from : 'Anonymous <me@mailgun.sample.org>',
     to : `${email}`,
@@ -14,14 +15,18 @@ function sendVerificationLink(email, token, res) {
   mailgun.messages().send(data, (err, body) => {
     if(err) {
       console.log(err)
+
       res.status(err.statusCode).json({
-        status : "Coudn't send the mail!; Retry again..."
+        status : "Your data is securely stored but coudn't send the mail!; Try again..."
       })
+
     } else {
       console.log(body)
+
       res.status(201).json({
-        status : "The mail has been successfully sent; Check your inbox/spam"
+        msg : "Your data is securely stored and the mail has been successfully sent; Check your inbox/spam"
       })
+
     }
   })
 }
