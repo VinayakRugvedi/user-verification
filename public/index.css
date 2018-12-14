@@ -24,6 +24,7 @@ body {
   font-family: 'Monoton', cursive;
   box-shadow: 0px 0px 50px black;
   border-radius: 10px;
+  animation: bounceIn 0.8s;
 }
 
 .registerContainer input {
@@ -36,6 +37,15 @@ body {
   border: none;
   padding: 4px;
   color: white;
+}
+
+.registerContainer input:focus, .registerContainer input:hover {
+  transform: scale(1.04);
+}
+
+::placeholder {
+  color: cyan;
+  opacity: 0.5;
 }
 
 .registerContainer button {
@@ -59,4 +69,22 @@ body {
   font-size: 30px;
   font-family: 'VT323', monospace;
   color: cyan;
+}
+
+@keyframes bounceIn {
+  0%{
+    transform: scale(0.5);
+  }
+  70%{
+    transform: scale(1.1);
+  }
+  80%{
+    transform: scale(0.9);
+  }
+  90%{
+    transform: scale(1.05);
+  }
+  100%{
+    transform: scale(1);
+  }
 }
