@@ -2,4 +2,7 @@
 /node_modules
 
 #Configuration of mailgun
-/mailgunConfig.js
+/controllers/mailgunConfig.js
+
+#Connection string for postgresql
+/model/postgresql/connectionSecret.js
