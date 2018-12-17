@@ -50,10 +50,11 @@ function fetch(token, res) {
 
       const updateQuery = {
         name : 'set-verified-to-true',
-        text : 'UPDATE data SET verified = true WHERE id = $1 RETURNING *',
+        text : 'UPDATE data SET verified = true WHERE id = $1',
         values : [fetchResult.rows[0].id]
       }
 
+      //Checking whether the verification link is still valid or not to update verified status
       let isLinkValid = !isExpired(fetchResult.rows[0].expires)
       if(isLinkValid) {
         client.query(updateQuery, (updateErr, updateResult) => {
@@ -76,6 +77,7 @@ function fetch(token, res) {
           values : [fetchResult.rows[0].id]
         }
 
+        //Delete the users data if the verification link has expired
         client.query(deleteQuery, (deleteErr, deleteResult) => {
           if(deleteErr) {
             console.log(deleteErr)
@@ -99,9 +101,38 @@ function isExpired(time) {
   return currentTime > time ? true : false
 }
 
+function preCheck(email, res, next) {
+  //Checking whether this users info is already pesent in the DB or not
+  const fetchQuery = {
+    name : 'check-if-userInfo-exists',
+    text : `SELECT * FROM data WHERE email[1] = '${email}'`
+  }
+
+  client.query(fetchQuery, (fetchErr, fetchResult) => {
+    if(fetchErr) {
+      console.log(fetchErr)
+      res.status(502).json({
+      msg : 'Oops!, something went wrong; Try again...'
+      })
+    }
+    else {
+      if(fetchResult.rows.length === 0) next()
+      else if(!fetchResult.rows[0].verified) {
+        //Hasnt verified yet *eg:data stored on db but email sending fails
+        sendVerificationLink(fetchResult.rows[0].email[0], fetchResult.rows[0].token[0], res)
+      } else {
+        res.status(201).json({
+          msg : 'You have already been verified - Just Sign Up with the credentials'
+        })
+      }
+    }
+  })
+}
+
 const handleDB = {
   store,
-  fetch
+  fetch,
+  preCheck
 }
 
 module.exports = handleDB
