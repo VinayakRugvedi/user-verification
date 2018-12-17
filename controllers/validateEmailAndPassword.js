@@ -29,8 +29,12 @@ function validatePassword(password, confirmPassword) {
   let messageObject = {
     msg : ''
   }
-  if(validator.isEmpty(password) || validator.isEmpty(confirmPassword)) {
-    messageObject.msg = "Either the password or the Confirm Password field is left empty"
+  if(validator.isEmpty(password)) {
+    messageObject.msg = "The password field is left empty"
+    return messageObject
+  }
+  if(validator.isEmpty(confirmPassword)) {
+    messageObject.msg = "The Confirm Password field is left empty"
     return messageObject
   }
   if(!validator.isLength(password, {min:8, max:25}) || !validator.isLength(confirmPassword, {min:8, max:25})) {
