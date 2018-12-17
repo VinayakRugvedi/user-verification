@@ -21,7 +21,7 @@ function storeUserDataInDB(data, res) {
 
 function checkIfUserRegistered(req, res, next) {
   const fetchQuery = queries.fetchUserData('email', req.body.email)
-  console.log(fetchQuery);
+  console.log(fetchQuery)
   client.query(fetchQuery, (fetchErr, fetchResult) => {
     if(fetchErr) {
       console.log(fetchErr)
@@ -100,10 +100,32 @@ function isExpired(time) {
   } else return false
 }
 
+function getHashIfAvailable(email, compare, res) {
+  const fetchQuery = queries.fetchUserData('email', email)
+  console.log(fetchQuery)
+
+  client.query(fetchQuery, (fetchErr, fetchResult) => {
+    if(fetchErr) {
+      console.log(fetchErr)
+      res.status(502).json({
+      msg : 'Couldnt retrive data; Try again after some time...'
+      })
+    } else {
+      console.log(fetchResult.rows[0])
+      if(fetchResult.rows.length === 0)
+        res.status(201).json({
+          msg : "Looks like you havent created an account yet; Create one soon"
+        })
+      else compare(fetchResult.rows[0].password[0])
+    }
+  })
+}
+
 const handleDB = {
   storeUserDataInDB,
   checkIfUserRegistered,
-  updateUsersVerifiedStatus
+  updateUsersVerifiedStatus,
+  getHashIfAvailable
 }
 
 module.exports = handleDB
