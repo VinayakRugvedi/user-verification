@@ -7,39 +7,57 @@ const cryptoRandomString = require('crypto-random-string')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 
-router.use('/userVerify', (req, res, next) => {
+router.use('/verifyUser', (req, res, next) => {
   console.log(req.body)
 
   //Validating the body which contains email and password before moving ahead
-  if( !validator.isEmpty(req.body.email) && validator.isEmail(req.body.email)) {
-    if( !validator.isEmpty(req.body.password) && !validator.isEmpty(req.body.confirmedPassword) ) {
-      if(validator.isLength(req.body.password, {min : 8, max : 25})
-         && validator.isLength(req.body.confirmedPassword, {min : 8, max : 25})) {
-           if(validator.equals(req.body.password, req.body.confirmedPassword)) {
-             next() //Move on to handling the respecive route
-           } else {
-             res.status(400).json({
-               msg : 'The passwords do not match'
-             })
-           }
-         } else {
-           res.status(400).json({
-             msg : 'The length of password should be in the range of 8 - 25'
-           })
-         }
-    } else {
-      res.status(400).json({
-        msg : 'Either of the password field is empty!'
-      })
-    }
-  } else {
-    res.status(400).json({
-      msg : 'The email is either empty or not in the right format!'
-    })
-  }
+  let validationStatus =
+  validateEmailAndPassword(req.body.email, req.body.password, req.body.confirmedPassword)
+  if(typeof validationStatus === 'object')
+    res.status(400).json(validationStatus)
+  else next()
 })
 
-router.post('/userVerify', (req, res) => {
+function validateEmailAndPassword(email, password, confirmPassword) {
+  let messageObject = {
+    msg : ''
+  }
+  if(validator.isEmpty(email)) {
+    messageObject.msg = "The email field is left empty"
+    return messageObject
+  }
+  if(!validator.isEmail(email)) {
+    messageObject.msg = "The email entered is not in the right format"
+    return messageObject
+  }
+  return (validatePassword(password, confirmPassword))
+}
+
+function validatePassword(password, confirmPassword) {
+  let messageObject = {
+    msg : ''
+  }
+  if(validator.isEmpty(password) || validator.isEmpty(confirmPassword)) {
+    messageObject.msg = "Either the password or the Confirm Password field is left empty"
+    return messageObject
+  }
+  if(!validator.isLength(password, {min:8, max:25}) || !validator.isLength(confirmPassword, {min:8, max:25})) {
+    messageObject.msg = "The length of password should be in the range of 8 - 25"
+    return messageObject
+  }
+  if(!validator.equals(password, confirmPassword)) {
+    messageObject.msg = "The passwords do not match"
+    return messageObject
+  }
+  return true
+}
+
+router.use('/verifyUser', (req, res, next) => {
+  //Cross check if user has already registered
+  handleDB.preCheck(req.body.email, res, next) //cb
+})
+
+router.post('/verifyUser', (req, res) => {
 
   let token = cryptoRandomString(32)
   let date = new Date()
@@ -55,7 +73,7 @@ router.post('/userVerify', (req, res) => {
     console.log(hash) //Hashed password to be stored in db
     userData.password = hash //Store userData
 
-    //Upon Validation and Hashing
+    //Upon Validation and Hashing - Store
     handleDB.store(userData, res)
   })
   .catch( err => {
