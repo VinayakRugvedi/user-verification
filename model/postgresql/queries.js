@@ -10,7 +10,8 @@ function insertUserData(data) {
 function fetchUserData(field, value) {
   const fetchQuery = {
     name : 'get-users-data',
-    text : `SELECT * FROM data where ${field}[1] = '${value}'`
+    text : `SELECT * FROM data where ${field}[1] = $1`,
+    values : [`${value}`]
   }
   return fetchQuery
 }
