@@ -15,18 +15,14 @@ function sendVerificationLink(email, token, res) {
   mailgun.messages().send(data, (err, body) => {
     if(err) {
       console.log(err)
-
-      res.status(err.statusCode).json({
-        status : "Your data is securely stored but coudn't send the verification link!; Try again..."
+      res.status(502).json({
+        msg : "Your data is securely stored but coudn't send the verification link!; Try again..."
       })
-
     } else {
       console.log(body)
-
       res.status(201).json({
         msg : "Your data is securely stored and the verification link has been successfully sent; Check your inbox or spam folder"
       })
-
     }
   })
 }
