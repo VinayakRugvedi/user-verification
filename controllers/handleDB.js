@@ -1,31 +1,31 @@
-const postgresql = require('../model/postgresql')
+const dataBase = require('../model/mongodb')
 const sendVerificationLink = require('./sendVerificationLink')
 
-async function storeUserDataInDB(data, res) {
-  let insertResult = await postgresql.insert(data)
+async function storeUserDataInDB(userData, res) {
+  let insertResult = await dataBase.insert(userData)
   if(insertResult === undefined) {
     res.status(502).json({
       msg : 'Oops!, couldnt save your data in the DB; Try again...'
     })
   } else {
-    console.log(insertResult.rows)
+    console.log(insertResult);
     // Upon storing, send a Verification link
-    sendVerificationLink(data.email, data.token, res)
+    sendVerificationLink(userData.email, userData.token, res)
   }
 }
 
 async function checkIfUserRegistered(req, res, next) {
-  let fetchResult = await postgresql.fetch('email', req.body.email)
+  let fetchResult = await dataBase.fetch('email', req.body.email)
   if(fetchResult === undefined) {
     res.status(502).json({
     msg : 'Oops!, something went wrong; Try again...'
     })
   } else {
-    console.log(fetchResult.rows)
-      if(fetchResult.rows.length === 0) next()
-      else if(!fetchResult.rows[0].verified)
-        //Hasnt verified yet *eg:data stored on db but email sending fails
-      sendVerificationLink(fetchResult.rows[0].email[0], fetchResult.rows[0].token[0], res)
+      if(Object.keys(fetchResult).length === 0) next()
+      else if(!fetchResult.verified) {
+      //Hasnt verified yet *eg:data stored on db but email sending fails
+      sendVerificationLink(fetchResult.email, fetchResult.token, res)
+      }
       else
         res.status(201).json({
           msg : 'You have already been verified - Just Sign Up with the credentials'
@@ -34,29 +34,34 @@ async function checkIfUserRegistered(req, res, next) {
 }
 
 async function updateUsersVerifiedStatus(req, res, next) {
-  console.log(req.params.token)
   let fetchResult =
-  await postgresql.fetch('token', req.params.token)
+  await dataBase.fetch('token', req.params.token)
   if(fetchResult === undefined) {
     res.status(502).json({
       msg : 'Couldnt retrive data; Try clicking the link again after some time...'
     })
   } else {
-    console.log(fetchResult.rows, 'Verification')
-    let isLinkValid =
-    await isExpired(fetchResult.rows[0].expires, fetchResult.rows[0].id, res)
-    if(!isLinkValid) {
-      let updateResult = await postgresql.update(fetchResult.rows[0].id)
-      if(updateResult === undefined)
-        res.status(502).json({
-          msg : 'Couldnt set data; Try clicking the link again after some time...'
-        })
-      else {
-        console.log(updateResult)
-        res.status(201).json({
-          msg : 'Congratulations, You are verified...'
-        })
-      }
+    if(Object.keys(fetchResult).length === 0)
+      res.status(200).json({
+        msg : 'This link is invalid and we dont have your data, kindle sign up again!'
+      })
+    else await takeActionBasedOnLinkExpiration(fetchResult, res)
+  }
+}
+
+async function takeActionBasedOnLinkExpiration(fetchResult, res) {
+  let isLinkValid =
+  await isExpired(fetchResult.expires, fetchResult._id, res)
+  if(!isLinkValid) {
+    let updateResult = await dataBase.update(fetchResult._id)
+    if(updateResult === undefined)
+      res.status(502).json({
+        msg : 'Couldnt set data; Try clicking the link again after some time...'
+      })
+    else {
+      res.status(201).json({
+        msg : 'Congratulations, You are verified...'
+      })
     }
   }
 }
@@ -65,13 +70,12 @@ async function updateUsersVerifiedStatus(req, res, next) {
 async function isExpired(time, id, res) {
   let currentTime = Date.now()
   if(currentTime > time) {
-    let deleteResult = await postgresql.deleteData(id)
+    let deleteResult = await dataBase.deleteData(id)
     if(deleteResult === undefined)
       res.status(502).json({
         msg : 'Oops!, something went wrong; Try again...'
       })
     else {
-      console.log(deleteResult)
       res.status(201).json({
       msg : 'The verification link has expired; Kindle re-register at the registration page'
       })
@@ -80,23 +84,22 @@ async function isExpired(time, id, res) {
   else return false
 }
 
-async function getHashIfAvailable(email, res) {
-  let fetchResult = await postgresql.fetch('email', email)
+async function getHashIfAvailableAndAuthenticate(email, res) {
+  let fetchResult = await dataBase.fetch('email', email)
   if(fetchResult === undefined)
     res.status(502).json({
     msg : 'Couldnt retrive data; Try again after some time...'
     })
   else {
-    console.log(fetchResult.rows)
-    if(fetchResult.rows.length === 0)
+    if(Object.keys(fetchResult).length === 0)
       res.status(201).json({
         msg : "Looks like you havent created an account yet; Create one soon"
       })
-    else if(!fetchResult.rows[0].verified)
+    else if(!fetchResult.verified)
       res.status(201).json({
         msg : "Your account has not been verified yet!; Check your inbox or spam folder..."
       })
-    else return fetchResult.rows[0].password[0]
+    else return fetchResult.password
   }
 }
 
@@ -104,7 +107,7 @@ const handleDB = {
   storeUserDataInDB,
   checkIfUserRegistered,
   updateUsersVerifiedStatus,
-  getHashIfAvailable
+  getHashIfAvailableAndAuthenticate
 }
 
 module.exports = handleDB
