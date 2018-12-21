@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const handleDB = require('./handleDB')
 
 async function authenticateTheUser(req, res, next) {
-  let hash = await handleDB.getHashIfAvailable(req.body.email, res)
+  let hash = await handleDB.getHashIfAvailableAndAuthenticate(req.body.email, res)
   if(hash) compare(hash, req, res)
 }
 
