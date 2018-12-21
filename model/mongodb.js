@@ -1,5 +1,7 @@
+const config = require('../config')
+
 const mongoose = require('mongoose')
-const connectionString = 'mongodb+srv://vinayak:1.618033@cluster0-synfk.mongodb.net/users?retryWrites=true'
+const connectionString = config.dataBaseConfiguration.connectionString
 
 mongoose.connect(connectionString, {
   useNewUrlParser: true,
@@ -40,7 +42,7 @@ async function insert(data) {
   let insertResult =
   await info.save()
   .catch((insertError) => console.log(insertError))
-  console.log(insertResult)
+  console.log(insertResult, 'inserttttttt')
   //insertResult is a document object
   return insertResult
 }

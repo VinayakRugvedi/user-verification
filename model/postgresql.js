@@ -1,5 +1,7 @@
+const config = require('../config')
+
 const {Client} = require('pg')
-const connectionString = 'postgresql://vinayak:1.618033@localhost:5432/users'
+const connectionString = config.dataBaseConfiguration.connectionString
 const client = new Client(connectionString)
 client.connect()
 
@@ -54,8 +56,8 @@ async function fetch(field, value) {
   const fetchResult =
   await client.query(fetchQuery)
   .catch((error) => console.log(error))
-  console.log(fetchResult.rows)
-  //Empty or not will be tested 
+  console.log(fetchResult)
+  //Empty or not will be tested
   return fetchResult.rows.length
          ? structuredResultObject(fetchResult.rows[0])
          : {}

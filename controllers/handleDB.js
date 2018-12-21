@@ -1,4 +1,6 @@
-const dataBase = require('../model/mongodb')
+const config = require('../config')
+
+const dataBase = require(`../model/${config.dataBaseConfiguration.dataBase}`)
 const sendVerificationLink = require('./sendVerificationLink')
 
 async function storeUserDataInDB(userData, res) {
@@ -46,6 +48,7 @@ async function updateUsersVerifiedStatus(req, res, next) {
         msg : 'This link is invalid and we dont have your data, kindle sign up again!'
       })
     else await takeActionBasedOnLinkExpiration(fetchResult, res)
+         .catch((error) => console.log(error))
   }
 }
 
