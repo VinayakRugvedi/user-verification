@@ -17,7 +17,6 @@ function getInsertQuery(data) {
 
 function getFetchQuery(field, value) {
   const fetchQuery = {
-    name : 'get-users-data',
     text : `SELECT * FROM data where ${field}[1] = $1`,
     values : [`${value}`]
   }
@@ -45,40 +44,42 @@ function getDeleteQuery(id) {
 async function insert(data) {
   const insertQuery = getInsertQuery(data)
   const insertResult =
-  await client.query(insertQuery)
-  .catch((error) => console.log(error))
-  console.log(insertResult)
-  return insertResult.rows
+    await client.query(insertQuery)
+      .catch((error) => console.log(error))
+  console.log(insertResult, 'Insert Result')
+  return insertResult
 }
 
 async function fetch(field, value) {
   const fetchQuery = getFetchQuery(field, value)
   const fetchResult =
-  await client.query(fetchQuery)
-  .catch((error) => console.log(error))
-  console.log(fetchResult)
+    await client.query(fetchQuery)
+      .catch((error) => console.log(error))
+  console.log(fetchResult.rows, 'Fetch Result')
   //Empty or not will be tested
-  return fetchResult.rows.length
-         ? structuredResultObject(fetchResult.rows[0])
-         : {}
+  if(fetchResult === undefined) return undefined
+  else
+    return fetchResult.rows.length
+           ? structuredResultObject(fetchResult.rows[0])
+           : {}
 }
 
 async function update(id) {
   const updateQuery = getUpdateQuery(id)
   const updateResult =
-  await client.query(updateQuery)
-  .catch((error) => console.log(error))
-  console.log(updateResult.rows) //It yeilds empty array
-  return updateResult.rowCount
+    await client.query(updateQuery)
+      .catch((error) => console.log(error))
+  console.log(updateResult, 'Update Result') //It yeilds empty array
+  return updateResult
 }
 
 async function deleteData(id) {
   const deleteQuery = getDeleteQuery(id)
   const deleteResult =
-  await client.query(deleteQuery)
-  .catch((error) => console.log(error))
-  console.log(deleteResult.rows)
-  return structuredResultObject(deleteResult.rows[0])
+    await client.query(deleteQuery)
+      .catch((error) => console.log(error))
+  console.log(deleteResult, 'Delete Result')
+  return deleteResult
 }
 
 function structuredResultObject(object) {
@@ -90,7 +91,7 @@ function structuredResultObject(object) {
     password : object.password[0],
     verified : object.verified
   }
-  console.log(result)
+  console.log(result, 'result object')
   return result
 }
 
