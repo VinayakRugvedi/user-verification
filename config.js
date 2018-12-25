@@ -8,6 +8,9 @@
   :: Dependency -- Validator
 
 # Once the validations are successfull,
+  # The email is checked against the infos available on the DB, to prevent the
+    duplication of users info on DB -- subsequently an appropriate action is taken
+
   # The password is hashed
     :: Dependency -- bcrypt
 
@@ -18,7 +21,7 @@
   # Upon successfull storage, a verification link with an
     expiration is sent to the email address provided
     :: Dependency -- crypto-random-string - for tokens
-    :: Dependency -- mailgun-js
+    :: Dependency -- mailgun-js or sendgrid
 **************************************************************
 */
 
@@ -34,18 +37,22 @@ const dataBaseConfiguration = {
   */
 }
 
-const mailgunConfiguration = {
+const mailConfiguration = {
+  mailer :
+  /* mailgun or sendgrid*/
+  
   apiKey :
   /* Provide your private key here
      example : 'XXXXXX2b715c9a0790994f135XXXXXXX-b378XXXX-eb713XXX'
   */
   domain :
-  /* Provide your sandbox/custom domain name
+  //Required only if the mailer is set to mailgun
+  /* Provide your sandbox/custom domain name (mailgun)
      example : 'sandboxXXXXXX392eb64c2aaf4459fa2cXXXXXX.mailgun.org'
   */
 }
 
 module.exports = {
   dataBaseConfiguration,
-  mailgunConfiguration
+  mailConfiguration
 }
