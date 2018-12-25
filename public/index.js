@@ -3,7 +3,7 @@ submitButton.addEventListener('click', () => {
   var emailEntered = document.getElementById('email')
   var passwordEntered = document.getElementById('password')
   var confirmedPassword = document.getElementById('confirmedPassword')
-  fetch('http://localhost:5000/verifyUser', {
+  fetch('http://localhost:5000/signUp', {
     method : "POST",
     body : JSON.stringify({
       email : emailEntered.value,
