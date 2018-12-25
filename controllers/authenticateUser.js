@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt')
 
 const handleDB = require('./handleDB')
 
-async function authenticateTheUser(req, res, next) {
+async function authenticateUser(req, res, next) {
   let hash = await handleDB.getHashIfAvailableAndAuthenticate(req.body.email, res)
   if(hash) compare(hash, req, res)
 }
@@ -28,4 +28,4 @@ function compare(hash, req, res) {
   })
 }
 
-module.exports = authenticateTheUser
+module.exports = authenticateUser
