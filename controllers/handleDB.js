@@ -1,7 +1,7 @@
 const config = require('../config')
 
 const dataBase = require(`../model/${config.dataBaseConfiguration.dataBase}`)
-const sendVerificationLink = require('./sendVerificationLink')
+const sendVerificationLink = require(`./sendVerificationLink/${config.mailConfiguration.mailer}`)
 
 async function storeUserDataInDB(userData, res) {
   let insertResult = await dataBase.insert(userData)
@@ -10,7 +10,6 @@ async function storeUserDataInDB(userData, res) {
       msg : 'Oops!, couldnt save your data in the DB; Try again...'
     })
   } else {
-    console.log(insertResult);
     // Upon storing, send a Verification link
     sendVerificationLink(userData.email, userData.token, res)
   }
@@ -36,8 +35,7 @@ async function checkIfUserRegistered(req, res, next) {
 }
 
 async function updateUsersVerifiedStatus(req, res, next) {
-  let fetchResult =
-  await dataBase.fetch('token', req.params.token)
+  let fetchResult = await dataBase.fetch('token', req.params.token)
   if(fetchResult === undefined) {
     res.status(502).json({
       msg : 'Couldnt retrive data; Try clicking the link again after some time...'
@@ -48,13 +46,12 @@ async function updateUsersVerifiedStatus(req, res, next) {
         msg : 'This link is invalid and we dont have your data, kindle sign up again!'
       })
     else await takeActionBasedOnLinkExpiration(fetchResult, res)
-         .catch((error) => console.log(error))
+          .catch((error) => console.log(error))
   }
 }
 
 async function takeActionBasedOnLinkExpiration(fetchResult, res) {
-  let isLinkValid =
-  await isExpired(fetchResult.expires, fetchResult._id, res)
+  let isLinkValid = await isExpired(fetchResult.expires, fetchResult._id, res)
   if(!isLinkValid) {
     let updateResult = await dataBase.update(fetchResult._id)
     if(updateResult === undefined)
